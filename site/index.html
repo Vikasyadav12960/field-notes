@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="en"><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Field Notes · Career explorer</title>
+<style>
+:root{color-scheme:light;--ink:#223c34;--paper:#faf8f0;--line:#c9cfc1}*{box-sizing:border-box}body{margin:0;background:#eeeede;color:var(--ink);font:17px/1.55 "DM Sans",system-ui,sans-serif}main{max-width:840px;margin:auto;padding:30px 18px 70px}header{display:flex;justify-content:space-between;align-items:baseline;border-bottom:2px solid var(--ink);padding-bottom:12px}header b{font: bold 28px Georgia,serif}header span,small{font-size:14px}section{background:var(--paper);border:1px solid var(--line);border-top:5px solid #52775e;padding:clamp(18px,5vw,44px);margin-top:24px;border-radius:4px 4px 16px 16px}h1{font:normal clamp(32px,6vw,54px)/1.07 Georgia,serif;margin:0 0 18px}h2{font:normal 26px Georgia,serif}label,legend{display:block;font-weight:650;margin-top:16px}input:not([type=checkbox]),select,textarea{display:block;width:100%;padding:10px;margin-top:5px;background:white;border:1px solid #87988a;border-radius:5px;font:inherit;color:inherit}textarea{min-height:82px}fieldset{padding:0;border:0;margin:0}fieldset label{font-weight:normal;display:inline-block;background:#e6ecdf;padding:7px 10px;margin:5px 4px 0 0;border-radius:6px}button{background:var(--ink);color:white;font:inherit;padding:10px 18px;border:0;border-radius:6px;cursor:pointer}button.secondary{color:var(--ink);background:#e4e9dd}nav{display:flex;gap:10px;margin-top:24px;flex-wrap:wrap}.prompt{border-left:4px solid #9c692e;background:#f2eddb;padding:14px 16px;white-space:pre-line}small{display:block;margin-top:14px}pre{white-space:pre-wrap;overflow-wrap:anywhere;font:inherit}button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible{outline:3px solid #ad641f;outline-offset:2px}[hidden]{display:none}
+</style>
+<main><header><b>Field Notes</b><span>Career explorer</span></header>
+<form id="journey">
+<section><h1 tabindex="-1">Which work draws you in?</h1><p>Start with something you’re curious about. You can care about a field and still choose different work to support yourself or your family.</p>
+<label>One field you’re curious about<input id="interest" required maxlength="100" list="fields" placeholder="Type a field or choose an example"></label><datalist id="fields"><option>Trading</option><option>Technology</option><option>Teaching</option><option>Creative work</option><option>Retail</option><option>Healthcare</option><option>Agriculture</option></datalist>
+<label>A field you’d actually try working in today (optional)<input id="work" maxlength="100" list="fields" placeholder="Leave open if you’re exploring"></label>
+<fieldset><legend>What matters to you? Choose any that fit.</legend>
+<label><input type="checkbox"> Enjoying the work</label><label><input type="checkbox"> Supporting family</label><label><input type="checkbox"> Financial independence</label><label><input type="checkbox"> Stable hours</label><label><input type="checkbox"> A personal goal</label><label><input type="checkbox"> Still exploring</label></fieldset>
+<label>In your own words (optional)<input id="why" maxlength="300"></label>
+<nav><button>Continue</button></nav><small>Private to this page. Reloading clears your answers.</small></section>
+<section hidden><h1 tabindex="-1">Choose what to explore</h1><p id="context"></p><label>Field to focus on<select id="focus"></select></label>
+<label>What would you like to find out first?<select id="route"><option value="task">Would I enjoy a typical task?</option><option value="fit">Would the daily work fit my priorities?</option><option value="compare">How does it compare with another path?</option></select></label>
+<label id="otherLabel" hidden>Field to compare<input id="other" maxlength="100" list="fields"></label><nav><button type="button" class="secondary back">Back</button><button>See my experiment</button></nav></section>
+<section hidden><h1 tabindex="-1">Try a small experiment</h1><p class="prompt" id="experiment"></p>
+<label>What did you notice, enjoy, or find difficult?<textarea id="observation" required maxlength="800"></textarea></label>
+<label>What would you like to do now?<select id="reaction"><option value="again">Try more of this work</option><option value="change">Explore a different path</option><option value="unsure">Learn more before deciding</option></select></label>
+<label>What would make this hard in your life? (optional)<input id="barrier" maxlength="300" placeholder="For example, travel time or equipment"></label>
+<nav><button type="button" class="secondary back">Back</button><button>See my next step</button></nav></section>
+<section hidden><h1 tabindex="-1">Your field note</h1><pre id="note"></pre><h2>Your next step</h2><p class="prompt" id="next"></p>
+<nav><button type="button" class="secondary back">Edit reflection</button><button type="button" id="save">Save my note</button><button type="button" class="secondary" id="restart">Start again</button></nav></section></form></main>
+<script>
+const $=id=>document.getElementById(id);
+const pages=Array.from(document.querySelectorAll('section'));
+const tasks=[
+ [/trad(e|ing)|markets|stocks/i,'Read these fictional closing prices for five days: 100, 104, 101, 98, 102. Describe the biggest daily fall and one thing the numbers cannot tell you. Use paper only.'],
+ [/software|coding|technology|programming/i,'Sketch three screens for a bus timetable app. Walk through what a student would see if their bus were cancelled.'],
+ [/retail|business|shop/i,'A shop has 6 pens and 30 notebooks. Yesterday it sold 5 pens and 4 notebooks. Choose what to reorder first and write one question for the owner.'],
+ [/teach|education/i,'Explain fractions to a beginner using a shared meal. Write one question that would show whether they understood.'],
+ [/creativ|film|design|art\b/i,'Sketch three frames for a poster or short film about a familiar street. Revise one frame to make the message clearer.'],
+ [/health|nurs|medic/i,'Sketch a clinic check-in sign for a first-time visitor. Read it aloud and remove one point of confusion.'],
+ [/agricult|farm/i,'Sketch a seven-day field observation sheet. Pick three things a grower could record and explain why each matters.']
+];
+function sample(field){return tasks.find(([pattern])=>pattern.test(field))?.[1] || 'Find one beginner role description in '+field+'. Pick a task it mentions and sketch a first attempt on paper. Write one question an experienced person could answer.'}
+let page=0;
+function show(index){page=index;pages.forEach((p,i)=>{p.hidden=i!==index;for(const el of p.querySelectorAll('input,textarea,select'))el.disabled=p.hidden});pages[index].querySelector('h1').focus()}
+const val=id=>$(id).value.trim();
+function reasons(){return [...document.querySelectorAll('input[type=checkbox]:checked')].map(box=>box.parentElement.textContent.trim()).concat(val('why')||[])}
+function compareMode(){const compare=val('route')==='compare';$('otherLabel').hidden=!compare;$('other').required=compare}
+function prepare(){const fields=[...new Set([val('interest'),val('work')].filter(Boolean))];const previous=val('focus');$('focus').replaceChildren(...fields.map(f=>new Option(f,f)));if(fields.includes(previous))$('focus').value=previous;$('context').textContent='You’re curious about '+val('interest')+'. '+(val('work')?'You’d consider working in '+val('work')+'.':'You’re keeping your work options open.')+(reasons().length?' Your priorities include '+reasons().join(', ')+'.':'');compareMode()}
+function experiment(){const f=val('focus'), priorities=reasons().join(', ')||'your personal priorities';
+ if(val('route')==='fit')return 'Look up one beginner role related to '+f+'. Write down its hours, pay arrangement and location, marking missing details as unknown. Which detail matters most given '+priorities+'? Write one question you would ask before accepting.';
+ if(val('route')==='compare')return 'Try a short sample from each path.\n\n'+f+' — '+sample(f)+'\n\n'+val('other')+' — '+sample(val('other'))+'\n\nWhich task would you repeat, and which fits '+priorities+' better?';
+ return sample(f)}
+function finish(){const f=val('focus');$('note').textContent=['Curious about: '+val('interest'),'Willing to try: '+(val('work')||'Still exploring'),'What matters: '+(reasons().join(' · ')||'Left open'),'Experiment: '+$('experiment').textContent,'What I noticed: '+val('observation'),'My choice: '+$('reaction').selectedOptions[0].text,'Possible obstacle: '+(val('barrier')||'Left open')].join('\n\n');const next={again:'Try a second, slightly harder sample in '+f+'. Choose one part of your first attempt to improve and keep both versions.',change:'Choose another field and run a short sample. Compare it with your note about '+f+' before choosing which to explore.',unsure:'Read a first-person account of working in '+f+'. Find one detail that answers a question raised by your experiment.'};$('next').textContent=next[val('reaction')]+(val('barrier')?' Before you begin, identify one adjustment for “'+val('barrier')+'”.':'')}
+$('route').onchange=compareMode;
+$('journey').onsubmit=e=>{e.preventDefault();for(const el of pages[page].querySelectorAll('[required]')){if(!el.value.trim()){el.value='';el.reportValidity();return}}
+ if(page===0)prepare();
+ if(page===1){if(val('route')==='compare'&&val('other').toLowerCase()===val('focus').toLowerCase()){$('other').setCustomValidity('Choose a different field to compare.');$('other').reportValidity();return}const task=experiment();if($('experiment').textContent!==task){$('observation').value='';$('barrier').value='';$('reaction').selectedIndex=0}$('experiment').textContent=task}
+ if(page===2)finish();if(page<3)show(page+1)};
+for(const el of [$('other'),$('focus'),$('route')])el.addEventListener('input',()=>$('other').setCustomValidity(''));
+document.querySelectorAll('.back').forEach(b=>b.onclick=()=>show(page-1));
+$('restart').onclick=()=>{$('journey').reset();$('other').setCustomValidity('');$('experiment').textContent='';show(0)};
+$('save').onclick=()=>{const blob=new Blob(['Field Notes\n\n'+$('note').textContent+'\n\nNext step: '+$('next').textContent],{type:'text/plain;charset=utf-8'});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='my-field-note.txt';a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000)};
+show(0);
+</script></html>
